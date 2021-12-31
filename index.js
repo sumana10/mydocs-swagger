@@ -1,39 +1,75 @@
-const express = require('express');
+const express = require("express");
 
-const app = express()
+const app = express();
 
-const swaggerUi = require('swagger-ui-express');
-const YAML = require('yamljs');
-const swaggerDocument = YAML.load('./swagger.yaml');
+const swaggerUi = require("swagger-ui-express");
+const YAML = require("yamljs");
+const swaggerDocument = YAML.load("./swagger.yaml");
+const fileUpload = require("express-fileupload");
 
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use(express.json());//to get req.body data instead the use of body parser
+app.use(fileUpload());
 
 let courses = [
   {
-      id: "11",
-      name: "Learn Swagger",
-      price: 888
+    id: 11,
+    name: "Learn Reactjs",
+    price: 299,
   },
   {
-      id: "12",
-      name: "Learn Smart Contract",
-      price: 777
+    id: 22,
+    name: "Learn Angular",
+    price: 399,
   },
   {
-      id: "13",
-      name: "Learn Web3.js",
-      price: 222
-  }
-]
-app.get('/', (req, res)=>{
+    id: 33,
+    name: "Learn Django",
+    price: 499,
+  },
+];
+
+app.get("/", (req, res) => {
   res.send("hello from lco");
-})
-app.get('/api/v1/lco', (req, res)=>{
-  res.send("hello from lco");
-})
-app.get('/api/v1/lcoobject', (req, res)=>{
-  res.send({id:11, name:"learn probackend", price:666});
-})
+});
+
+app.get("/api/v1/lco", (req, res) => {
+  res.send("hello from lco docs");
+});
+
+app.get("/api/v1/lcoobject", (req, res) => {
+  res.send({ id: "55", name: "Learn Backend", price: 999 });
+});
+
+app.get("/api/v1/courses", (req, res) => {
+  res.send(courses);
+});
+
+app.get("/api/v1/mycourse/:courseId", (req, res) => {
+  const myCourse = courses.find((course) => course.id === req.params.courseId);
+  res.send(myCourse);
+});
+
+app.post("/api/v1/addCourse", (req, res) => {
+  console.log(req.body);
+  courses.push(req.body);
+  res.send(true);
+});
+app.get("/api/v1/coursequery", (req, res) => {
+  let location = req.query.location;
+  let device = req.query.device;
+  console.log(req.query);
+  
+  res.send({location, device});
+});
+app.post("/api/v1/courseupload", (req, res) => {
+  console.log(req.headers);
+  const file = req.files.file;
+  let path = __dirname + "/images/" + Date.now() + ".jpg"
+  file.mv(path, (err)=>{
+    res.send(true)
+  })
+});
 
 
 app.listen(4000, ()=>console.log("Server is running at port 4000"))
